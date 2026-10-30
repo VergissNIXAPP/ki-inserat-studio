@@ -15,7 +15,7 @@ Deine mobile Web-App läuft ohne Raspberry Pi. GitHub enthält den Quellcode. Ei
 - Frühere Korrekturen für Rückfragenformat und zweistufige Anmeldung integriert.
 - GitHub-Prüfung der Python-Dateien bei Push.
 
-**Wegen der beobachteten Kleinanzeigen-IP-Sperre sind automatische Kleinanzeigen-Zugriffe standardmäßig vollständig ausgeschaltet.** Auch der Preisabruf ist ausgeschaltet. Die KI-Analyse greift nur auf OpenAI zu. Die Cloud-Migration ist keine Aufhebung der Sperre und darf nicht als Wiederholung blockierter Zugriffe über eine neue IP verstanden werden. Der Browseradapter ist unbestätigt und nicht Voraussetzung für die Fotoanalyse.
+**Automatisches Inserieren ist bei Neueinrichtung aktiviert.** Nach Prüfung und Bestätigung des Entwurfs startet der Veröffentlichungsversuch. Der Preisabruf bleibt ausgeschaltet. Bei IP-Sperren, CAPTCHA oder zusätzlichen Anmeldeschritten hält der Ablauf an. Die Browseranbindung ist experimentell und noch nicht live verifiziert.
 
 ## A. Was du brauchst
 
@@ -146,19 +146,27 @@ Der erste Build lädt Python-Pakete und Chromium und dauert einige Minuten. Es m
 
 Der Pi kann ausgeschaltet bleiben. Keine Tailscale-App nötig. Der neue Server muss laufen. Die App-PIN schützt die APIs; die Login-Oberfläche selbst ist öffentlich erreichbar. Wer die PIN kennt, kann deine kostenpflichtige API benutzen. Nicht teilen.
 
-## H. Automatisierung und vorhandene IP-Sperre
+## H. Automatisches Inserieren aktivieren
 
-Die Einstellungen sind absichtlich:
+Neue Einrichtungen mit `python3 setup.py` übernehmen diese Vorgaben:
 
 ```dotenv
-ENABLE_KLEINANZEIGEN_ACCESS=false
+ENABLE_KLEINANZEIGEN_ACCESS=true
 ENABLE_MARKET_CHECK=false
-ALLOW_AUTO_PUBLISH=false
+ALLOW_AUTO_PUBLISH=true
 ```
 
-Der erste Schalter sperrt sowohl Kontospeicherung als auch den Veröffentlichungs-Endpunkt und den automatischen Preisabruf. Die Datei `automation.py` ist als experimenteller Bestandscode enthalten. Sie erkennt jetzt auch die beobachtete IP-Sperrmeldung und bricht ab. Keine Fingerprint-Tarnung, Proxy-Rotation oder CAPTCHA-Umgehung ist enthalten.
+Bei bestehender Installation bleiben deine Zugangsdaten und deine `.env` unverändert. Nach `git pull --ff-only` öffne `nano .env` und setze die drei Werte wie oben. Danach:
 
-Nicht auf dem neuen Server weiterprobieren, um die bestehende Sperre zu umgehen. Erst Sperrklärung über Kleinanzeigen abwarten. Ein später freigegebener Betrieb müsste separat live geprüft werden; Kategorie, Login, Pflichtfelder, Cookies und erfolgreiche Veröffentlichung sind weiterhin nicht verifiziert. Dieses Paket verspricht keinen funktionierenden Vollautoposter.
+```bash
+sudo docker compose up -d --build --force-recreate app
+```
+
+Öffne die App erneut, speichere dein Kleinanzeigen-Konto in den Einstellungen, lade Fotos hoch und lasse sie analysieren. Prüfe Titel, Beschreibung, Preis und Pflichtfelder, bestätige die Angaben und drücke „Automatisches Inserieren versuchen“. Der Ablauf versucht Anmeldung, Formularausfüllung, Bilderupload und Veröffentlichung. Erfolg wird erst nach erkannter Bestätigung angezeigt.
+
+`ENABLE_KLEINANZEIGEN_ACCESS=false` schaltet die Kontospeicherung und Veröffentlichungsversuche wieder aus. `ALLOW_AUTO_PUBLISH=false` stoppt den Ablauf vor dem finalen Veröffentlichungsklick. `ENABLE_MARKET_CHECK=false` lässt den optionalen Preisabruf ausgeschaltet.
+
+Eine vorhandene IP-Sperre wird dadurch nicht aufgehoben. Der Adapter stoppt bei erkannten Sperrmeldungen; es gibt keine automatischen Wiederholungen. Zusätzliche Anmeldeschritte, CAPTCHA oder 2FA können eine manuelle Anmeldung erfordern. Login, Kategorie, Pflichtfelder und Veröffentlichung sind weiterhin nicht live verifiziert; die Aktivierung garantiert keine erfolgreiche Anzeige.
 
 ## I. Aktualisieren, stoppen, Daten sichern
 
