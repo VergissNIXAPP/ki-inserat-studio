@@ -1,0 +1,30 @@
+name: ki-inserat
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - app_data:/app/data
+    shm_size: 512mb
+    init: true
+    mem_limit: 2g
+    cpus: 2
+  web:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:?Bitte zuerst python3 setup.py ausfuehren}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+volumes:
+  app_data:
+  caddy_data:
+  caddy_config:

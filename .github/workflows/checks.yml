@@ -1,0 +1,15 @@
+name: Code pruefen
+on: [push, pull_request]
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m compileall -q server.py automation.py app_utils.py setup.py
+      - run: pip install -r requirements.txt
+      - run: python -m unittest discover -p "test_*.py"

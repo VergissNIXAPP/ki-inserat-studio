@@ -1,0 +1,9 @@
+.git
+.github
+.env
+.env.*
+.venv
+__pycache__
+data
+*backup*
+*.zip
